@@ -79,6 +79,58 @@ app.get('/products', async (req,resp)=>{
 
 })
 
+app.get('/product/:Id', async (req, res)=>{
+ 
+    let result2 = await Product.findOne({_id:req.params.Id})
+    res.send(result2)
+ 
+ })
+
+ app.put('/product/:Id', async (req, res)=>{
+ 
+    let result2 = await Product.updateOne(
+        {_id:req.params.Id},{
+            $set: req.body
+        }
+        
+        )
+    res.send(result2)
+ 
+ })
+
+
+//  mohsin method
+// app.get('/product/:id', async (req, res)=>{
+
+//     let { id }= req.params
+  
+//     console.log(id)
+
+//     let result2 = await Product.findOne(id)
+//     if(result2){
+     
+//         res.status(200).json({messae:"sucess",result2})
+    
+//        }
+//        else{
+//         res.status(400).json({result:"No Data Found"})
+//        }
+ 
+//  })
+
+app.delete('/product/:productId', async (req,resp)=>{
+
+    // let products = await Product.findOne();
+     
+    // let result= Product.mapReduce((a)=>req.params.productId    )
+          
+    // yeh Product ==>table me jae ek ko delete kro _id ==> me dekho phir params means browser se jo id aa rhi hai usko delete kro
+   let result = await Product.deleteOne({_id:req.params.productId})
+
+    resp.send(result)
+
+ })
+
 
 
 app.listen(5000,()=>{
