@@ -19,56 +19,6 @@ const Jwt = require('jsonwebtoken');
 // jwt key
 const jwtKey ="e-commerce"
 
-
-app.post("/register", async (req, res)=>{
-
-    let user = new User(req.body)
-    let result = await user.save()
-    // toObject convert into object
-    result =result.toObject()
-    delete result.password
-
-       // adding jwt token function of sign in with callback function
-        //  sign ek built-in function hai
-        //  ==>Synchronously sign the given payload into a JSON Web Token string payload - Payload to sign, could be an literal, buffer or string secretOrPrivateKey - Either the secret for HMAC algorithms, or the PEM encoded private key for RSA and ECDSA. [options] - Options for the signature returns - The JSON Web Token string
-        Jwt.sign({ result }, jwtKey , { expiresIn:"2h"} ,(err, token)=>{
-            console.log("token==>",token)
-            console.log("err==>",err)
-    
-            if(err){
-                    res.json({
-                        status:false,
-                        message:"some thing went wrong"
-                    })
-            }
-                       
-            res.json({
-                status:true,
-                result,
-                auth:token
-            })
-    
-    
-          });
-
-
-// res.send(result);
-
-})
-
-app.post('/addproduct', verifyToken ,  async (req ,res)=>{
-
-    // product jo hai wo humera schema mtlb table me ja rha hai
-    // req.body ==>browser se data aae ga tou usko hum apne schema me model jo product me us me dalege
-    let product = new Product(req.body)
-    let result = await product.save();
-
-    res.send(product)
-
-})
-
-
-
 app.post("/login",  async (req,res) =>{
     // resp.send(req.body)
     // findeOne ==>ek data ke lye use hota hai
@@ -119,7 +69,56 @@ app.post("/login",  async (req,res) =>{
     
 })
 
-app.get('/products',  async (req,resp)=>{
+
+app.post("/register", async (req, res)=>{
+
+    let user = new User(req.body)
+    let result = await user.save()
+    // toObject convert into object
+    result =result.toObject()
+    delete result.password
+
+       // adding jwt token function of sign in with callback function
+        //  sign ek built-in function hai
+        //  ==>Synchronously sign the given payload into a JSON Web Token string payload - Payload to sign, could be an literal, buffer or string secretOrPrivateKey - Either the secret for HMAC algorithms, or the PEM encoded private key for RSA and ECDSA. [options] - Options for the signature returns - The JSON Web Token string
+        Jwt.sign({ result }, jwtKey , { expiresIn:"2h"} ,(err, token)=>{
+            console.log("token==>",token)
+            console.log("err==>",err)
+    
+            if(err){
+                    res.json({
+                        status:false,
+                        message:"some thing went wrong"
+                    })
+            }
+                       
+            res.json({
+                status:true,
+                result,
+                auth:token
+            })
+    
+    
+          });
+
+
+// res.send(result);
+
+})
+
+app.post('/addproduct', verifyToken ,  async (req ,res)=>{
+
+    // product jo hai wo humera schema mtlb table me ja rha hai
+    // req.body ==>browser se data aae ga tou usko hum apne schema me model jo product me us me dalege
+    let product = new Product(req.body)
+    let result = await product.save();
+
+    res.send(product)
+
+})
+
+
+app.get('/products', verifyToken,  async (req,resp)=>{
 
    let products = await Product.find();
    
@@ -134,14 +133,14 @@ app.get('/products',  async (req,resp)=>{
 
 })
 
-app.get('/product/:Id',  async (req, res)=>{
+app.get('/product/:Id', verifyToken,  async (req, res)=>{
  
     let result2 = await Product.findOne({_id:req.params.Id})
     res.send(result2)
  
  })
 
- app.put('/product/:Id',  async (req, res)=>{
+ app.put('/product/:Id', verifyToken, async (req, res)=>{
  
     let result2 = await Product.updateOne(
         {_id:req.params.Id},{
@@ -152,6 +151,20 @@ app.get('/product/:Id',  async (req, res)=>{
     res.send(result2)
  
  })
+
+ app.delete('/product/:productId', verifyToken, async (req,resp)=>{
+
+    // let products = await Product.findOne();
+     
+    // let result= Product.mapReduce((a)=>req.params.productId    )
+          
+    // yeh Product ==>table me jae ek ko delete kro _id ==> me dekho phir params means browser se jo id aa rhi hai usko delete kro
+   let result = await Product.deleteOne({_id:req.params.productId})
+
+    resp.send(result)
+
+ })
+
 
  //  mohsin method
 // app.get('/product/:id', async (req, res)=>{
@@ -172,18 +185,6 @@ app.get('/product/:Id',  async (req, res)=>{
  
 //  })
 
-app.delete('/product/:productId', verifyToken, async (req,resp)=>{
-
-    // let products = await Product.findOne();
-     
-    // let result= Product.mapReduce((a)=>req.params.productId    )
-          
-    // yeh Product ==>table me jae ek ko delete kro _id ==> me dekho phir params means browser se jo id aa rhi hai usko delete kro
-   let result = await Product.deleteOne({_id:req.params.productId})
-
-    resp.send(result)
-
- })
 
 
 //  middleware for verification Token
